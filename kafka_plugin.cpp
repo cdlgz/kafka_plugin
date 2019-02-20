@@ -373,7 +373,7 @@ using kafka_producer_ptr = std::shared_ptr<class kafka_producer>;
 
     void kafka_plugin_impl::_process_accepted_transaction(const chain::transaction_metadata_ptr &t) {
 
-       const auto& trx = t->trx;
+       const auto& trx = t->packed_trx->get_signed_transaction();
        string trx_json = fc::json::to_string( trx );
        producer->trx_kafka_sendmsg(KAFKA_TRX_ACCEPT,(char*)trx_json.c_str());
 
