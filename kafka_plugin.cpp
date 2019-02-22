@@ -378,7 +378,7 @@ using kafka_producer_ptr = std::shared_ptr<class kafka_producer>;
       const auto& trx_id = t->id;
       const auto trx_id_str = trx_id.str();
       string trx_json = fc::json::to_string( trx );
-      string transaction_metadata_json = "{\"trx_id\":" + trx_id_str + ",\"trace\":" + trx_json.c_str() + "}";
+      string transaction_metadata_json = "{\"trx_id\":\"" + trx_id_str + "\",\"trace\":" + trx_json.c_str() + "}";
       producer->trx_kafka_sendmsg(KAFKA_TRX_ACCEPT,(char*)transaction_metadata_json.c_str());
 
     }
