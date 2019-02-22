@@ -87,6 +87,8 @@ using kafka_producer_ptr = std::shared_ptr<class kafka_producer>;
 
         void init();
 
+        template<typename T> fc::variant to_variant_with_abi( const T& obj );
+
         bool configured{false};
 
         uint32_t start_block_num = 0;
@@ -309,7 +311,6 @@ using kafka_producer_ptr = std::shared_ptr<class kafka_producer>;
         }
     }
 
-
     void kafka_plugin_impl::process_accepted_transaction(const chain::transaction_metadata_ptr &t) {
         try {
             // always call since we need to capture setabi on accounts even if not storing transactions
@@ -373,19 +374,22 @@ using kafka_producer_ptr = std::shared_ptr<class kafka_producer>;
 
     void kafka_plugin_impl::_process_accepted_transaction(const chain::transaction_metadata_ptr &t) {
 
-       const auto& trx = t->packed_trx->get_signed_transaction();
-       string trx_json = fc::json::to_string( trx );
-       producer->trx_kafka_sendmsg(KAFKA_TRX_ACCEPT,(char*)trx_json.c_str());
+      const auto& trx = t->packed_trx->get_signed_transaction();
+      const auto& trx_id = t->id;
+      const auto trx_id_str = trx_id.str();
+      string trx_json = fc::json::to_string( trx );
+      string transaction_metadata_json = "{\"trx_id\":" + trx_id_str + ",\"trace\":" + trx_json.c_str() + "}";
+      producer->trx_kafka_sendmsg(KAFKA_TRX_ACCEPT,(char*)transaction_metadata_json.c_str());
 
     }
 
     void kafka_plugin_impl::_process_applied_transaction(const trasaction_info_st &t) {
 
-       uint64_t time = (t.block_time.time_since_epoch().count()/1000);
-            string transaction_metadata_json =
-                    "{\"block_number\":" + std::to_string(t.block_number) + ",\"block_time\":" + std::to_string(time) +
-                    ",\"trace\":" + fc::json::to_string(t.trace).c_str() + "}";
-       producer->trx_kafka_sendmsg(KAFKA_TRX_APPLIED,(char*)transaction_metadata_json.c_str());
+      uint64_t time = (t.block_time.time_since_epoch().count()/1000);
+      string transaction_metadata_json =
+              "{\"block_number\":" + std::to_string(t.block_number) + ",\"block_time\":" + std::to_string(time) +
+              ",\"trace\":" + fc::json::to_string(t.trace).c_str() + "}";
+      producer->trx_kafka_sendmsg(KAFKA_TRX_APPLIED,(char*)transaction_metadata_json.c_str());
 
     }
 
