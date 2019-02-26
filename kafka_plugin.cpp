@@ -591,14 +591,14 @@ void kafka_plugin::plugin_initialize(const variables_map &options)
 
       if (accept_trx_topic != NULL)
       {
-        accept_trx_topic_enabled = true;
         elog("accept_trx_topic:${j}", ("j", accept_trx_topic));
+        my->accept_trx_topic_enabled = true;
       }
 
       if (applied_trx_topic != NULL)
       {
-        applied_trx_topic_enabled = true;
         elog("applied_trx_topic:${j}", ("j", applied_trx_topic));
+        my->applied_trx_topic_enabled = true;
       }
 
       if (0 != my->producer->trx_kafka_init(brokers_str, accept_trx_topic, applied_trx_topic))
