@@ -100,6 +100,8 @@ public:
 
   uint32_t start_block_num = 0;
   bool start_block_reached = false;
+  bool accept_trx_topic_enabled = false;
+  bool applied_trx_topic_enabled = false;
 
   size_t queue_size = 10000;
   std::deque<chain::transaction_metadata_ptr> transaction_metadata_queue;
@@ -475,6 +477,10 @@ void kafka_plugin_impl::process_accepted_block(const chain::block_state_ptr &bs)
 
 void kafka_plugin_impl::_process_accepted_transaction(const chain::transaction_metadata_ptr &t)
 {
+  if (!accept_trx_topic_enabled)
+  {
+    return;
+  };
 
   const auto &trx = t->packed_trx->get_signed_transaction();
   const auto &trx_id = t->id;
@@ -486,6 +492,10 @@ void kafka_plugin_impl::_process_accepted_transaction(const chain::transaction_m
 
 void kafka_plugin_impl::_process_applied_transaction(const trasaction_info_st &t)
 {
+  if (!applied_trx_topic_enabled)
+  {
+    return;
+  }
 
   uint64_t time = (t.block_time.time_since_epoch().count() / 1000);
   string transaction_metadata_json =
@@ -581,11 +591,13 @@ void kafka_plugin::plugin_initialize(const variables_map &options)
 
       if (accept_trx_topic != NULL)
       {
+        accept_trx_topic_enabled = true;
         elog("accept_trx_topic:${j}", ("j", accept_trx_topic));
       }
 
       if (applied_trx_topic != NULL)
       {
+        applied_trx_topic_enabled = true;
         elog("applied_trx_topic:${j}", ("j", applied_trx_topic));
       }
 
