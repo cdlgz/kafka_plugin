@@ -500,7 +500,7 @@ void kafka_plugin_impl::_process_applied_transaction(const trasaction_info_st &t
   const auto trx_id_str = trx_id.str();
   uint64_t time = (t.block_time.time_since_epoch().count() / 1000);
   string transaction_metadata_json =
-      "{\"trx_id\":\"" + std::to_string(trx_id_str) + "\",\"block_number\":" + std::to_string(t.block_number) + ",\"block_time\":" + std::to_string(time) +
+      "{\"trx_id\":\"" + trx_id_str + "\",\"block_number\":" + std::to_string(t.block_number) + ",\"block_time\":" + std::to_string(time) +
       ",\"trace\":" + fc::json::to_string(t.trace).c_str() + "}";
   producer->trx_kafka_sendmsg(KAFKA_TRX_APPLIED, (char *)transaction_metadata_json.c_str());
 }
